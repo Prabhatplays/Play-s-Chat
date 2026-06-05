@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plays Chat Signup Page</title>
+</head>
+<body>
+<script>
+async function handleSignup() {
+  const username = document.getElementById('username').value
+  const password = document.getElementById('password').value
+
+  const res = await fetch('/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+
+  const data = await res.json()
+
+  if(res.ok) {
+    alert('Account created successfully!')
+    window.location.href = '/login.html'
+  } else {
+    alert(data.message)
+  }
+}
+</script>
+    <h1>Plays Chat</h1>
+    <div id="box">
+        <h3>Welcome to Plays Chat Signup Page</h3>
+        <div id="signup">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter Your Username">
+            <br><br>
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter Your PAssword">
+            <br><br>
+            <button onclick="handleSignup()">Sign Up</button>
+        </div>
+        <button onclick="window.location.href='login.html'">Login</button>
+    </div>
+</body>
+</html>
