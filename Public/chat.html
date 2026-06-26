@@ -1,78 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plays Chat</title>
-    <style>
-        #chat {
-            border: 1px solid #ccc;
-            height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .msg {
-            margin: 5px 0;
-        }
-        .msg span {
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Plays Chat</title>
+  <style>
+    #chat {
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .msg { margin: 5px 0; }
+    .msg span { font-weight: bold; }
+  </style>
 </head>
 <body>
-    <h1>Plays Chat</h1>
+  <h1>Plays Chat</h1>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="Type your message..." />
+  <button id="sendBtn">Send</button>
 
-    <!-- messages appear here -->
-    <div id="chat"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/Login.html';
 
-    <input type="text" id="message" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
+    const socket = io({ auth: { token } });
 
-    <!-- Step 1: Load socket.io — this comes from YOUR server automatically -->
-    <script src="/socket.io/socket.io.js"></script>
+    socket.on('connect_error', (err) => {
+      alert('Session expired. Please login again.');
+      localStorage.removeItem('token');
+      window.location.href = '/Login.html';
+    });
 
-    <script>
-        // Step 2: Get token that was saved during login
-        const token = localStorage.getItem('token');
+    // NEW — when we first connect, server sends old messages
+    // we display ALL of them one by one
+    socket.on('load_messages', (messages) => {
+      messages.forEach(({ username, text, time }) => {
+        addMessage(username, text, new Date(time).toLocaleTimeString());
+      });
+    });
 
-        // Step 3: If no token, not logged in — send back to login page
-        if (!token) window.location.href = '/Login.html';
+    // When anyone sends a new message, display it
+    socket.on('receive_message', ({ username, text, time }) => {
+      addMessage(username, text, time);
+    });
 
-        // Step 4: Connect to socket server and send token as proof of login
-        const socket = io({ auth: { token } });
+    // This function adds a message to the chat box
+    // We made it a function so we can reuse it in both places above
+    function addMessage(username, text, time) {
+      const chat = document.getElementById('chat');
+      const div = document.createElement('div');
+      div.className = 'msg';
+      div.innerHTML = `<span>${username}</span> [${time}]: ${text}`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-        // Step 5: If token is wrong/expired, kick them to login
-        socket.on('connect_error', (err) => {
-            alert('Session expired. Please login again.');
-            localStorage.removeItem('token');
-            window.location.href = '/Login.html';
-        });
+    // Send button click
+    document.getElementById('sendBtn').onclick = () => {
+      const input = document.getElementById('message');
+      const text = input.value.trim();
+      if (text) {
+        socket.emit('send_message', text);
+        input.value = '';
+      }
+    };
 
-        // Step 6: When server sends a message, display it
-        socket.on('receive_message', ({ username, text, time }) => {
-            const chat = document.getElementById('chat');
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<span>${username}</span> [${time}]: ${text}`;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight; // auto scroll to bottom
-        });
-
-        // Step 7: When Send button is clicked
-        document.getElementById('sendBtn').onclick = () => {
-            const input = document.getElementById('message');
-            const text = input.value.trim();
-            if (text) {
-                socket.emit('send_message', text); // send to server
-                input.value = ''; // clear the input box
-            }
-        };
-
-        // Step 8: Also send message when Enter key is pressed
-        document.getElementById('message').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') document.getElementById('sendBtn').click();
-        });
-    </script>
+    // Enter key to send
+    document.getElementById('message').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('sendBtn').click();
+    });
+  </script>
 </body>
 </html>

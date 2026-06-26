@@ -3,7 +3,7 @@ const db = require('../config/db');
 
 module.exports = (io) => {
 
-  
+  // Security check
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('No token'));
@@ -20,7 +20,7 @@ module.exports = (io) => {
 
     socket.join('general');
 
-   
+    // When user connects → load last 50 messages from DB and send to THEM ONLY
     db.query(
       'SELECT username, text, time FROM messages ORDER BY time ASC LIMIT 50',
       (err, results) => {
@@ -28,18 +28,16 @@ module.exports = (io) => {
           console.log('Error loading messages', err);
           return;
         }
-       
         socket.emit('load_messages', results);
       }
     );
 
-    
+    // When user sends a message
     socket.on('send_message', (text) => {
-
       const username = socket.user.username;
       const time = new Date();
 
-
+      // First save to database
       db.query(
         'INSERT INTO messages (username, text, time) VALUES (?, ?, ?)',
         [username, text, time],
@@ -48,8 +46,7 @@ module.exports = (io) => {
             console.log('Error saving message', err);
             return;
           }
-
-         
+          // Then broadcast to everyone
           io.to('general').emit('receive_message', {
             username,
             text,
