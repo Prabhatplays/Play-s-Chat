@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <h2 id ="username-display"></h2> 
+    <script>
+ const token = localStorage.getItem('token');
+ const payload = token.split('.')[1];
+ const decoded = JSON.parse(atob(payload));
+ console.log(decoded.username);
+ document.getElementById('username-display').textContent = decoded.username;
+ 
+    </script>
+</head>
+<body>
+   <h2 id="username-display"> </h2>
+   <img src=""
+</body>
+</html>
