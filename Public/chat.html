@@ -37,23 +37,26 @@
     // NEW — when we first connect, server sends old messages
     // we display ALL of them one by one
     socket.on('load_messages', (messages) => {
-      messages.forEach(({ username, text, time }) => {
-        addMessage(username, text, new Date(time).toLocaleTimeString());
+      messages.forEach(({ username, text, time , profile_pic }) => {
+        addMessage(username, text, new Date(time).toLocaleTimeString(), profile_pic);
       });
     });
 
     // When anyone sends a new message, display it
-    socket.on('receive_message', ({ username, text, time }) => {
-      addMessage(username, text, time);
+    socket.on('receive_message', ({ username, text, time, profile_pic }) => {
+      addMessage(username, text, time , profile_pic);
     });
 
     // This function adds a message to the chat box
     // We made it a function so we can reuse it in both places above
-    function addMessage(username, text, time) {
+    function addMessage(username, text, time , profile_pic) {
       const chat = document.getElementById('chat');
       const div = document.createElement('div');
       div.className = 'msg';
-      div.innerHTML = `<span>${username}</span> [${time}]: ${text}`;
+      div.innerHTML = `
+      <img src="${profile_pic || '/uploads/default.png'}" alt="Profile pic" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:5px;">
+      <span>${username}</span> [${time}]: ${text}
+      `;
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
     }

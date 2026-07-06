@@ -8,7 +8,9 @@ const { Server } = require('socket.io');
 
 const db = require('./src/config/db');
 const authRoutes = require('./src/Routes/auth');
+const profileRoutes = require('./src/Routes/profile');
 
+app.use('/profile' , profileRoutes);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'Public')));
 app.use('/auth', authRoutes);
