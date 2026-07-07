@@ -17,6 +17,11 @@
 </head>
 <body>
   <h1>Plays Chat</h1>
+  <div id="topbar">
+    <span>Logged in as: <strong id="username-display"></strong></span>
+    <button onclick="window.location.href='/profile.html'">My Profile</button>
+    <button onclick="logout()">Logout</button>
+</div>
   <div id="chat"></div>
   <input type="text" id="message" placeholder="Type your message..." />
   <button id="sendBtn">Send</button>
@@ -25,6 +30,15 @@
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/Login.html';
+const payload = token.split('.')[1];
+const decoded = JSON.parse(atob(payload));
+document.getElementById('username-display').textContent = decoded.username;
+
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/Login.html';
+}
 
     const socket = io({ auth: { token } });
 
@@ -34,21 +48,19 @@
       window.location.href = '/Login.html';
     });
 
-    // NEW — when we first connect, server sends old messages
-    // we display ALL of them one by one
+    
     socket.on('load_messages', (messages) => {
       messages.forEach(({ username, text, time , profile_pic }) => {
         addMessage(username, text, new Date(time).toLocaleTimeString(), profile_pic);
       });
     });
 
-    // When anyone sends a new message, display it
+    
     socket.on('receive_message', ({ username, text, time, profile_pic }) => {
       addMessage(username, text, time , profile_pic);
     });
 
-    // This function adds a message to the chat box
-    // We made it a function so we can reuse it in both places above
+    
     function addMessage(username, text, time , profile_pic) {
       const chat = document.getElementById('chat');
       const div = document.createElement('div');
@@ -61,7 +73,7 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // Send button click
+
     document.getElementById('sendBtn').onclick = () => {
       const input = document.getElementById('message');
       const text = input.value.trim();
@@ -71,7 +83,7 @@
       }
     };
 
-    // Enter key to send
+
     document.getElementById('message').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('sendBtn').click();
     });

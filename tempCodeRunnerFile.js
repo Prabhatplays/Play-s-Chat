@@ -1,1 +1,1 @@
-app.use('/profile' , profileRoutes);
+const profileRoutes = require('./src/Routes/profile');
