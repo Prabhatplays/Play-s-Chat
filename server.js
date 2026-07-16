@@ -12,7 +12,9 @@ const profileRoutes = require('./src/Routes/profile');
 
 app.use('/profile' , profileRoutes);
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'Public')));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Public', 'Login.html'));
+});
 app.use('/auth', authRoutes);
 
 const server = http.createServer(app);
