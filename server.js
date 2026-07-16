@@ -13,7 +13,7 @@ const profileRoutes = require('./src/Routes/profile');
 app.use('/profile' , profileRoutes);
 app.use(express.json());
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Public', 'Login.html'));
+    res.sendFile(path.join(__dirname, 'Public', 'index.html'));
 });
 app.use('/auth', authRoutes);
 
