@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/auth/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/profile/:path*",
       "destination": "/api/index"
     }
   ]
